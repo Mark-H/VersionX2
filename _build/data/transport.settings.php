@@ -2,6 +2,13 @@
 
 $s = array(
     'debug' => false,
+    'versioncount.resource' => 10,
+    'versioncount.template' => 10,
+    'versioncount.templatevariables' => 10,
+    'versioncount.chunk' => 10,
+    'versioncount.snippet' => 10,
+    'versioncount.plugin' => 10,
+    
     'formtabs.resource' => true,
     'formtabs.template' => true,
     'formtabs.templatevariables' => true,

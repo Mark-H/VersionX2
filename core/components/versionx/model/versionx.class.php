@@ -54,6 +54,8 @@ class VersionX {
             'css_url' => $assetsUrl.'css/',
             'assets_url' => $assetsUrl,
             'connector_url' => $assetsUrl.'connector.php',
+
+            'has_users_permission' => $this->modx->hasPermission('view_user'),
         ),$config);
 
         require_once dirname(__DIR__) . '/docs/version.inc.php';
@@ -186,6 +188,10 @@ class VersionX {
         }
         $version->set('tvs',$tvArray);
 
+        $keepCount = $this->modx->getOption('versionx.versioncount.resource', null, '10');
+
+        $this->deleteOldVersions("vxResource", $version, $keepCount);
+
         if($this->checkLastVersion('vxResource', $version)) {
             return $version->save();
         }
@@ -220,6 +226,10 @@ class VersionX {
         );
 
         $version->fromArray(array_merge($v,$tArray));
+
+        $keepCount = $this->modx->getOption('versionx.versioncount.template', null, '10');
+
+        $this->deleteOldVersions("vxTemplate", $version, $keepCount);
 
         if($this->checkLastVersion('vxTemplate', $version)) {
             return $version->save();
@@ -256,6 +266,10 @@ class VersionX {
         );
 
         $version->fromArray(array_merge($v,$tArray));
+
+        $keepCount = $this->modx->getOption('versionx.versioncount.templatevariables', null, '10');
+
+        $this->deleteOldVersions("vxTemplateVar", $version, $keepCount);
 
         if($this->checkLastVersion('vxTemplateVar', $version)) {
             return $version->save();
@@ -295,6 +309,10 @@ class VersionX {
 
         $version->fromArray(array_merge($v,$cArray));
 
+        $keepCount = $this->modx->getOption('versionx.versioncount.chunk', null, '10');
+
+        $this->deleteOldVersions("vxChunk", $version, $keepCount);
+
         if($this->checkLastVersion('vxChunk', $version)) {
             return $version->save();
         }
@@ -329,6 +347,10 @@ class VersionX {
 
         $version->fromArray(array_merge($v,$sArray));
 
+        $keepCount = $this->modx->getOption('versionx.versioncount.snippet', null, '10');
+
+        $this->deleteOldVersions("vxSnippet", $version, $keepCount);
+
         if($this->checkLastVersion('vxSnippet', $version)) {
             return $version->save();
         }
@@ -361,6 +383,10 @@ class VersionX {
         );
 
         $version->fromArray(array_merge($v,$pArray));
+
+        $keepCount = $this->modx->getOption('versionx.versioncount.plugin', null, '10');
+
+        $this->deleteOldVersions("vxPlugin", $version, $keepCount);
 
         if($this->checkLastVersion('vxPlugin', $version)) {
             return $version->save();
@@ -699,5 +725,30 @@ class VersionX {
         }
         return htmlentities($string, ENT_QUOTES | ENT_SUBSTITUTE, $this->charset);
     }
+
+    /**
+     * Checks if there are versions that need to be deleted
+     * @param string $class
+     * @param xPDOObject $version
+     * @param int $keepCount
+     */
+    private function deleteOldVersions($class = "vxResource", xPDOObject $version, $keepCount){
+        /* Get last version to make sure we've got some changes to save */
+        $c = $this->modx->newQuery($class);
+        $c->where(array('content_id' => $version->get('content_id')));
+        $c->sortby('version_id','ASC');
+
+        /** @var xPDOObject[] $versions */
+        $versions = $this->modx->getCollection($class,$c);
+
+        $versionCount = count($versions);
+        $counter = 1;
+        foreach ($versions as $version){
+            if($counter > $versionCount - $keepCount) break;
+            $version->remove();
+            $counter++;
+        }
+    }
+
 }
 
