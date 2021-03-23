@@ -169,7 +169,7 @@ class VersionX {
             'content_id' => $rArray['id'],
             'user' => $this->modx->user->get('id'),
             'mode' => $mode,
-            'title' => $rArray[$this->modx->getOption('resource_tree_node_name',null,'pagetitle')],
+            'title' => (empty($rArray[$this->modx->getOption('resource_tree_node_name')]) ? $rArray['pagetitle'] : $rArray[$this->modx->getOption('resource_tree_node_name')]),
             'context_key' => $rArray['context_key'],
             'class' => $rArray['class_key'],
             'content' => $resource->get('content'),
